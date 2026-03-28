@@ -615,8 +615,8 @@ void wifi_saved_networks(void)
 		y_offset = 14 + M1_GUI_FONT_HEIGHT;
 
 		/* Show selected network SSID */
-		strncpy(prn_msg, creds[sel_idx].ssid, 20);
-		prn_msg[20] = '\0';
+		strncpy(prn_msg, creds[sel_idx].ssid, 21);
+		prn_msg[21] = '\0';
 		u8g2_DrawStr(&m1_u8g2, 2, y_offset, prn_msg);
 		y_offset += M1_GUI_FONT_HEIGHT + 2;
 
@@ -745,8 +745,8 @@ void wifi_show_status(void)
 
 	if ( s_wifi_connected && s_connected_ssid[0] )
 	{
-		strncpy(prn_msg, s_connected_ssid, 20);
-		prn_msg[20] = '\0';
+		strncpy(prn_msg, s_connected_ssid, 21);
+		prn_msg[21] = '\0';
 		u8g2_DrawStr(&m1_u8g2, 2, y_offset, prn_msg);
 	}
 	else

@@ -31,7 +31,7 @@
 #define M1_VIRTUAL_KEY_ENTER			0x0A
 #define M1_VIRTUAL_KEY_NONE				0x00 // NULL
 
-#define M1_VIRTUAL_KB_FILENAME_MAX		20
+#define M1_VIRTUAL_KB_FILENAME_MAX		64
 //#define M1_VIRTUAL_KBS_DATA_MAX			14 // 10 + 4 spaces
 uint8_t M1_VIRTUAL_KBS_DATA_MAX;
 
@@ -382,7 +382,10 @@ uint8_t m1_vkb_get_filename(char *description, char *default_name, char *new_nam
 				filename[M1_VIRTUAL_KB_FILENAME_MAX] = 0x00;
 				len = M1_VIRTUAL_KB_FILENAME_MAX;
 			}
-			u8g2_DrawStr(&m1_u8g2, M1_VKB_FILENAME_POS_X, M1_VKB_FILENAME_POS_Y, filename);
+			/* Display with scrolling if longer than 21 chars */
+			char *disp_ptr = filename;
+			if ( len > 21 ) disp_ptr = filename + len - 21;
+			u8g2_DrawStr(&m1_u8g2, M1_VKB_FILENAME_POS_X, M1_VKB_FILENAME_POS_Y, disp_ptr);
 		} // if ( len )
 
 		y = M1_VKB_FIRST_ROW_TOP_POS_Y + M1_VKB_GUI_FONT_HEIGHT;
@@ -447,13 +450,26 @@ uint8_t m1_vkb_get_filename(char *description, char *default_name, char *new_nam
 							{
 								len--;
 								filename[len] = 0x00; // Add NULL to the end of the string
-								x = M1_VKB_FILENAME_POS_X;
-								x += M1_VKB_GUI_FONT_WIDTH*len;
-								y = M1_VKB_FILENAME_POS_Y;
-								// Clear this character
-								u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_BG);
-								u8g2_DrawBox(&m1_u8g2, x, y - M1_VKB_GUI_FONT_HEIGHT + 2, M1_VKB_GUI_FONT_WIDTH, M1_VKB_GUI_FONT_HEIGHT);
-								u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_TXT);
+
+								if ( len >= 21 )
+								{
+									/* Redraw whole filename area for scrolling */
+									u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_BG);
+									u8g2_DrawBox(&m1_u8g2, M1_VKB_FILENAME_FRAME_POS_X + 1, M1_VKB_FILENAME_FRAME_POS_Y + 1,
+												 M1_VKB_FILENAME_FRAME_WIDTH - 2, M1_VKB_FILENAME_FRAME_HEIGHT - 2);
+									u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_TXT);
+									u8g2_DrawStr(&m1_u8g2, M1_VKB_FILENAME_POS_X, M1_VKB_FILENAME_POS_Y, filename + len - 21);
+								}
+								else
+								{
+									x = M1_VKB_FILENAME_POS_X;
+									x += M1_VKB_GUI_FONT_WIDTH*len;
+									y = M1_VKB_FILENAME_POS_Y;
+									// Clear this character
+									u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_BG);
+									u8g2_DrawBox(&m1_u8g2, x, y - M1_VKB_GUI_FONT_HEIGHT + 2, M1_VKB_GUI_FONT_WIDTH, M1_VKB_GUI_FONT_HEIGHT);
+									u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_TXT);
+								}
 								m1_u8g2_nextpage(); // Update graphic to the display RAM
 							} // if (len)
 						}
@@ -466,11 +482,24 @@ uint8_t m1_vkb_get_filename(char *description, char *default_name, char *new_nam
 							filename[len] = key[0];
 							len++;
 							filename[len] = 0x00; // Add NULL to the end of the string
-							x = M1_VKB_FILENAME_POS_X;
-							x += M1_VKB_GUI_FONT_WIDTH*(len-1);
-							y = M1_VKB_FILENAME_POS_Y;
-							u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_TXT);
-							u8g2_DrawStr(&m1_u8g2, x, y, key); // Display this character
+
+							if ( len > 21 )
+							{
+								/* Redraw whole filename area for scrolling */
+								u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_BG);
+								u8g2_DrawBox(&m1_u8g2, M1_VKB_FILENAME_FRAME_POS_X + 1, M1_VKB_FILENAME_FRAME_POS_Y + 1,
+											 M1_VKB_FILENAME_FRAME_WIDTH - 2, M1_VKB_FILENAME_FRAME_HEIGHT - 2);
+								u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_TXT);
+								u8g2_DrawStr(&m1_u8g2, M1_VKB_FILENAME_POS_X, M1_VKB_FILENAME_POS_Y, filename + len - 21);
+							}
+							else
+							{
+								x = M1_VKB_FILENAME_POS_X;
+								x += M1_VKB_GUI_FONT_WIDTH*(len-1);
+								y = M1_VKB_FILENAME_POS_Y;
+								u8g2_SetDrawColor(&m1_u8g2, M1_DISP_DRAW_COLOR_TXT);
+								u8g2_DrawStr(&m1_u8g2, x, y, key); // Display this character
+							}
 							m1_u8g2_nextpage(); // Update graphic to the display RAM
 						} // if ( len < M1_VIRTUAL_KB_FILENAME_MAX )
 					} // else
